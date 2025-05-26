@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Engineering Notes Repository</title>
+<style>
+    /* Basic styling for the body */
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f7fa;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    /* Header styling */
+    header {
+        background: #004080;
+        color: white;
+        padding: 1rem 2rem;
+        text-align: center;
+    }
+
+    /* Navigation bar styling */
+    nav {
+        background: #0073e6;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        padding: 0.5rem;
+    }
+
+    /* Navigation buttons styling */
+    nav button {
+        background: #0059b3;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+
+    /* Hover and active state for navigation buttons */
+    nav button:hover,
+    nav button.active {
+        background: #003d66;
+    }
+
+    /* Main content area styling */
+    main {
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Section display control (hidden by default, active shows) */
+    section {
+        display: none;
+    }
+
+    section.active {
+        display: block;
+    }
+
+    /* Heading 2 styling */
+    h2 {
+        border-bottom: 2px solid #0073e6;
+        padding-bottom: 0.3rem;
+    }
+
+    /* Heading 3 styling */
+    h3 {
+        margin-top: 1.5rem;
+        color: #0059b3;
+    }
+
+    /* Unordered list styling */
+    ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    /* Subject list item styling */
+    li.subject {
+        background: white;
+        margin: 0.3rem 0;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    /* Hover effect for subject list items */
+    li.subject:hover {
+        background: #e6f0ff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* Modal styling */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 9999; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100vw; /* Full width */
+        height: 100vh; /* Full height */
+        background: rgba(0,0,0,0.6); /* Black w/ opacity */
+        align-items: center; /* Center content vertically */
+        justify-content: center; /* Center content horizontally */
+        padding: 1rem;
+    }
+
+    .modal.active {
+        display: flex; /* Show the modal */
+    }
+
+    /* Modal content box styling */
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 100%;
+        padding: 1.5rem;
+        border-radius: 6px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        position: relative;
+        max-height: 80vh; /* Max height for scrollable content */
+        overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    }
+
+    /* Modal header styling */
+    .modal-header {
+        font-weight: bold;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Modal body styling */
+    .modal-body {
+        white-space: pre-wrap; /* Preserves whitespace and line breaks */
+        margin-bottom: 1rem;
+    }
+
+    /* Modal footer styling */
+    .modal-footer {
+        text-align: right;
+    }
+
+    /* Styling for links and buttons within the modal footer */
+    .modal-footer a,
+    .modal-footer button {
+        background: #0073e6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Hover effect for modal footer buttons/links */
+    .modal-footer button:hover,
+    .modal-footer a:hover {
+        background: #0059b3;
+    }
+
+    /* Close button styling for the modal */
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.2s;
+    }
+
+    /* Hover effect for the close button */
+    .close-btn:hover {
+        color: #000;
+    }
+
+    /* Styling for unit download links within the modal */
+    #unitList li {
+        margin-bottom: 8px;
+    }
+
+    #unitList a {
+        display: inline-block;
+        background-color: #f0f0f0;
+        padding: 8px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0073e6;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    #unitList a:hover {
+        background-color: #e0e0e0;
+        color: #0059b3;
+    }
+
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 640px) {
+        nav {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>Engineering Notes Repository</h1>
+    <p>Click a branch to browse semesters and subjects. Click a subject to view and download notes.</p>
+</header>
+<nav id="branchNav">
+    <button data-branch="cse" class="active">CSE</button>
+    <button data-branch="ece">ECE</button>
+    <button data-branch="mech">Mechanical</button>
+    <button data-branch="ee">Electrical</button>
+    <button data-branch="civil">Civil</button>
+    <button data-branch="it">IT</button>
+</nav>
+<main>
+    <section id="cse" class="active">
+        <h2>Computer Science Engineering (CSE)</h2>
+        <article id="cse-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="CSE" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="cse-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        <article id="cse-sem3">
+            <h3>Semester 3</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="ES-301 - Energy & Environmental Engineering">ES-301 - Energy & Environmental Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="CS-302 - Discrete Structure">CS-302 - Discrete Structure</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="CS-303 - Data Structure">CS-303 - Data Structure</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="CS-304 - Digital Systems">CS-304 - Digital Systems</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="CS-305 - Object Oriented Programming & Methodology">CS-305 - Object Oriented Programming & Methodology</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="CS-306 - Computer Workshop">CS-306 - Computer Workshop</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="BT-107 - Evaluation of Internship-I completed at I year level">BT-107 - Evaluation of Internship-I completed at I year level</li>
+                <li class="subject" data-branch="CSE" data-sem="3" data-subject="BT-307 - 90 hrs Internship based on using various softwares –Internship -II">BT-307 - 90 hrs Internship based on using various softwares –Internship -II</li>
+            </ul>
+        </article>
+        <article id="cse-sem4">
+            <h3>Semester 4</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="BT-401 - Mathematics- III">BT-401 - Mathematics- III</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="CS-402 - Analysis Design of Algorithm">CS-402 - Analysis Design of Algorithm</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="CS-403 - Software Engineering">CS-403 - Software Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="CS-404 - Computer Org. & Architecture">CS-404 - Computer Org. & Architecture</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="CS-405 - Operating Systems">CS-405 - Operating Systems</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="CS-406 - Programming Practices">CS-406 - Programming Practices</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="BT-407 - 90 hrs Internship based on using various software’s –Internship -II">BT-407 - 90 hrs Internship based on using various software’s –Internship -II</li>
+                <li class="subject" data-branch="CSE" data-sem="4" data-subject="BT-408 - Cyber Security">BT-408 - Cyber Security</li>
+            </ul>
+        </article>
+        <article id="cse-sem5">
+            <h3>Semester 5</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-501 - Theory of Computation">CS-501 - Theory of Computation</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-502 - Database Management Systems">CS-502 - Database Management Systems</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-503 - Data Analytics">CS-503 - Data Analytics</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-503 - Pattern Recognition">CS-503 - Pattern Recognition</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-503 - Cyber Security">CS-503 - Cyber Security</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-504 - Internet and Web Technology">CS-504 - Internet and Web Technology</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-504 - Object Oriented Programming">CS-504 - Object Oriented Programming</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-504 - Introduction to Database Management Systems">CS-504 - Introduction to Database Management Systems</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-505 - Lab (Linux)">CS-505 - Lab (Linux)</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-506 - Lab (Python)">CS-506 - Lab (Python)</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-507 - Evaluation of Internship-II">CS-507 - Evaluation of Internship-II</li>
+                <li class="subject" data-branch="CSE" data-sem="5" data-subject="CS-508 - Minor Project-I">CS-508 - Minor Project-I</li>
+            </ul>
+        </article>
+        <article id="cse-sem6">
+            <h3>Semester 6</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-601 - Machine Learning">CS-601 - Machine Learning</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-602 - Computer Networks">CS-602 - Computer Networks</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-603 - Advanced Computer Architecture">CS-603 - Advanced Computer Architecture</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-603 - Computer Graphics & Visualisation">CS-603 - Computer Graphics & Visualisation</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-603 - Compiler Design">CS-603 - Compiler Design</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-604 - Knowledge Management">CS-604 - Knowledge Management</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-604 - Project Management">CS-604 - Project Management</li>
+                <li class="subject" data-branch="CSE" data-sem="6" data-subject="CS-604 - Rural Technology & Community Development">CS-604 - Rural Technology & Community Development</li>
+            </ul>
+        </article>
+        <article id="cse-sem7">
+            <h3>Semester 7</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-701 - Software Architectures">CS-701 - Software Architectures</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-702 - Big Data">CS-702 - Big Data</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-702 - Computational Intelligence">CS-702 - Computational Intelligence</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-702 - Deep & Reinforcement Learning">CS-702 - Deep & Reinforcement Learning</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-702 - Wireless & Mobile Computing">CS-702 - Wireless & Mobile Computing</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-703 - Agile Software Development">CS-703 - Agile Software Development</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-703 - Cryptography & Information Security">CS-703 - Cryptography & Information Security</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-703 - Data Mining and Warehousing">CS-703 - Data Mining and Warehousing</li>
+                <li class="subject" data-branch="CSE" data-sem="7" data-subject="CS-703 - Disaster Management">CS-703 - Disaster Management</li>
+            </ul>
+        </article>
+        <article id="cse-sem8">
+            <h3>Semester 8</h3>
+            <ul>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-801 - Internet of Things">CS-801 - Internet of Things</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-802 - Block Chain Technologies">CS-802 - Block Chain Technologies</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-802 - Cloud Computing">CS-802 - Cloud Computing</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-802 - High Performance computing">CS-802 - High Performance computing</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-802 - Object Oriented Software Engineering">CS-802 - Object Oriented Software Engineering</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-803 - Game Theory with Engineering applications">CS-803 - Game Theory with Engineering applications</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-803 - Image Processing and Computer Vision">CS-803 - Image Processing and Computer Vision</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-803 - Internet of Things">CS-803 - Internet of Things</li>
+                <li class="subject" data-branch="CSE" data-sem="8" data-subject="CS-803 - Managing Innovation and Entrepreneurship">CS-803 - Managing Innovation and Entrepreneurship</li>
+            </ul>
+        </article>
+    </section>
+
+    <section id="ece">
+        <h2>Electronics and Communication Engineering (ECE)</h2>
+        <article id="ece-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="ECE" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="ece-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="ECE" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        <article id="ece-sem3">
+            <h3>Semester 3</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="BT-301 - Mathematics-III">BT-301 - Mathematics-III</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="EC-302 - Electronic Measurement & Instrumentation">EC-302 - Electronic Measurement & Instrumentation</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="EC-303 - Digital System Design">EC-303 - Digital System Design</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="EC-304 - Electronic Devices">EC-304 - Electronic Devices</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="EC-305 - Network Analysis">EC-305 - Network Analysis</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="EC-306 - EMI Lab">EC-306 - EMI Lab</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="BT-107 - Evaluation of Internship-I completed at I year level">BT-107 - Evaluation of Internship-I completed at I year level</li>
+                <li class="subject" data-branch="ECE" data-sem="3" data-subject="BT-307 - 90 hrs Internship based on using various software’s –Internship -II">BT-307 - 90 hrs Internship based on using various software’s –Internship -II</li>
+            </ul>
+        </article>
+        <article id="ece-sem4">
+            <h3>Semester 4</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="ES-401 - Energy & Environmental Engineering">ES-401 - Energy & Environmental Engineering</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="EC-402 - Signals & Systems">EC-402 - Signals & Systems</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="EC-403 - Analog Communication">EC-403 - Analog Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="EC-404 - Control System">EC-404 - Control System</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="EC-405 - Analog Circuits">EC-405 - Analog Circuits</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="EC-406 - Simulation Lab">EC-406 - Simulation Lab</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="BT-407 - 90 hrs Internship based on using various software’s –Internship -II">BT-407 - 90 hrs Internship based on using various software’s –Internship -II</li>
+                <li class="subject" data-branch="ECE" data-sem="4" data-subject="BT-408 - Cyber Security">BT-408 - Cyber Security</li>
+            </ul>
+        </article>
+        <article id="ece-sem5">
+            <h3>Semester 5</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-501 - Microprocessor & its Application">EC-501 - Microprocessor & its Application</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-502 - Digital Communication">EC-502 - Digital Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-503 - CNTl">EC-503 - CNTl</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-503 - Mobile Communication">EC-503 - Mobile Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-503 - Advanced Control system">EC-503 - Advanced Control system</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-504 - EMT (Electro Magnetic (Theory)">EC-504 - EMT (Electro Magnetic (Theory)</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-504 - Computer System Organisation">EC-504 - Computer System Organisation</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-504 - Process Control Instrumentation">EC-504 - Process Control Instrumentation</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-505 - CNTL Lab">EC-505 - CNTL Lab</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-506 - Matlab Programming">EC-506 - Matlab Programming</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-507 - Evaluation of Internship-II">EC-507 - Evaluation of Internship-II</li>
+                <li class="subject" data-branch="ECE" data-sem="5" data-subject="EC-508 - Minor Project 1">EC-508 - Minor Project 1</li>
+            </ul>
+        </article>
+        <article id="ece-sem6">
+            <h3>Semester 6</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-601 - Digital Signal Processing">EC-601 - Digital Signal Processing</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-602 - Antenna & Wave propagation">EC-602 - Antenna & Wave propagation</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-603 - Data Communication">EC-603 - Data Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-603 - CMOS Design">EC-603 - CMOS Design</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-603 - Satellite Communication">EC-603 - Satellite Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-604 - Microcontroller & Embedded system">EC-604 - Microcontroller & Embedded system</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-604 - Bio-medical Electronics">EC-604 - Bio-medical Electronics</li>
+                <li class="subject" data-branch="ECE" data-sem="6" data-subject="EC-604 - Power Electronics">EC-604 - Power Electronics</li>
+            </ul>
+        </article>
+        <article id="ece-sem7">
+            <h3>Semester 7</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-701 - VLSI Design">EC-701 - VLSI Design</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-702 - Information Theory & Coding">EC-702 - Information Theory & Coding</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-702 - Microwave Engg">EC-702 - Microwave Engg</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-702 - Nano Electronics">EC-702 - Nano Electronics</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-703 - Cellular Mobile Communication">EC-703 - Cellular Mobile Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-703 - Internet of Things">EC-703 - Internet of Things</li>
+                <li class="subject" data-branch="ECE" data-sem="7" data-subject="EC-703 - Probability Theory & Stochastic Processor">EC-703 - Probability Theory & Stochastic Processor</li>
+            </ul>
+        </article>
+        <article id="ece-sem8">
+            <h3>Semester 8</h3>
+            <ul>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-801 - Optical Fiber Communication">EC-801 - Optical Fiber Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-802 - 5G Technology">EC-802 - 5G Technology</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-802 - AI & Signal Processing">EC-802 - AI & Signal Processing</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-802 - Wireless Communication">EC-802 - Wireless Communication</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-803 - Digital Image Processing">EC-803 - Digital Image Processing</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-803 - Speech Processing">EC-803 - Speech Processing</li>
+                <li class="subject" data-branch="ECE" data-sem="8" data-subject="EC-803 - Wireless Network">EC-803 - Wireless Network</li>
+            </ul>
+        </article>
+    </section>
+
+    <section id="mech">
+        <h2>Mechanical Engineering (MECH)</h2>
+        <article id="mech-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="MECH" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="mech-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        <article id="mech-sem3">
+            <h3>Semester 3</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="BT-301 - Mathematics-III">BT-301 - Mathematics-III</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="ME-302 - Thermodynamics">ME-302 - Thermodynamics</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="ME-303 - Materials Technology">ME-303 - Materials Technology</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="ME-304 - Strength of Material">ME-304 - Strength of Material</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="ME-305 - Manufacturing Process">ME-305 - Manufacturing Process</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="ME-306 - Thermal Engg Lab">ME-306 - Thermal Engg Lab</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="BT-107 - Evaluation of Internship-I completed at I Year Level">BT-107 - Evaluation of Internship-I completed at I Year Level</li>
+                <li class="subject" data-branch="MECH" data-sem="3" data-subject="BT-307 - 90 hrs Internship based on using various software’s –Internship -II">BT-307 - 90 hrs Internship based on using various software’s –Internship -II</li>
+            </ul>
+        </article>
+        <article id="mech-sem4">
+            <h3>Semester 4</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ES-401 - Energy & Environmental Engineering">ES-401 - Energy & Environmental Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ME-402 - INSTRUMENTATION & CONTROL">ME-402 - INSTRUMENTATION & CONTROL</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ME-403 - THEORY OF MACHINES">ME-403 - THEORY OF MACHINES</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ME-404 - FLUID MECHANICS">ME-404 - FLUID MECHANICS</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ME-405 - MANUFACTURING TECHNOLOGY">ME-405 - MANUFACTURING TECHNOLOGY</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="ME-406 - SOFTWARE LAB">ME-406 - SOFTWARE LAB</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="BT-407 - 90 hrs Internship based on using various software’s –Internship -II">BT-407 - 90 hrs Internship based on using various software’s –Internship -II</li>
+                <li class="subject" data-branch="MECH" data-sem="4" data-subject="BT-408 - Cyber Security">BT-408 - Cyber Security</li>
+            </ul>
+        </article>
+        <article id="mech-sem5">
+            <h3>Semester 5</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-501 - I C Engines">ME-501 - I C Engines</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-502 - Mechanical Vibration">ME-502 - Mechanical Vibration</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-503 - Mechatronics">ME-503 - Mechatronics</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-503 - Dynamics of Machine">ME-503 - Dynamics of Machine</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-503 - Alternate Automotive Fuels & Emissions">ME-503 - Alternate Automotive Fuels & Emissions</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-504 - Industrial Engineering & Ergonomics">ME-504 - Industrial Engineering & Ergonomics</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-504 - TQM and SQC">ME-504 - TQM and SQC</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-504 - Finite Element Method">ME-504 - Finite Element Method</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-505 - FEM/CFD Lab">ME-505 - FEM/CFD Lab</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-506 - Python">ME-506 - Python</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-507 - Evaluation of Internship-II">ME-507 - Evaluation of Internship-II</li>
+                <li class="subject" data-branch="MECH" data-sem="5" data-subject="ME-508 - Minor Project 1">ME-508 - Minor Project 1</li>
+            </ul>
+        </article>
+        <article id="mech-sem6">
+            <h3>Semester 6</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-601 - Thermal Engineering and Gas Dynamics">ME-601 - Thermal Engineering and Gas Dynamics</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-602 - Machine Component Design">ME-602 - Machine Component Design</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-603 - Turbo Machinery">ME-603 - Turbo Machinery</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-603 - Computer Aided Engineering">ME-603 - Computer Aided Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-603 - Product Design">ME-603 - Product Design</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-604 - Robotics">ME-604 - Robotics</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-604 - Optimisation Techniques">ME-604 - Optimisation Techniques</li>
+                <li class="subject" data-branch="MECH" data-sem="6" data-subject="ME-604 - Renewable Energy Technology">ME-604 - Renewable Energy Technology</li>
+            </ul>
+        </article>
+        <article id="mech-sem7">
+            <h3>Semester 7</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-701 - Heat and Mass Transfer">ME-701 - Heat and Mass Transfer</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-702 - Advance Machine Design">ME-702 - Advance Machine Design</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-702 - Advance Machining Processes">ME-702 - Advance Machining Processes</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-702 - Internet of Things [IOT]">ME-702 - Internet of Things [IOT]</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-702 - Power Plant Engineering">ME-702 - Power Plant Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-703 - Artificial Intelligence Techniques">ME-703 - Artificial Intelligence Techniques</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-703 - Operation Research and Supply Chain">ME-703 - Operation Research and Supply Chain</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-703 - Reliability Engineering">ME-703 - Reliability Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="7" data-subject="ME-703 - Systems Engineering">ME-703 - Systems Engineering</li>
+            </ul>
+        </article>
+        <article id="mech-sem8">
+            <h3>Semester 8</h3>
+            <ul>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-801 - Refrigeration & Air Conditioning">ME-801 - Refrigeration & Air Conditioning</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-802 - Automobile Engineering">ME-802 - Automobile Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-802 - Machine Tool Design">ME-802 - Machine Tool Design</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-802 - Production Planning and Control">ME-802 - Production Planning and Control</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-802 - Tribology & Maintenance Engineering">ME-802 - Tribology & Maintenance Engineering</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-803 - Data analytics">ME-803 - Data analytics</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-803 - Energy Conservation, Management & Audit">ME-803 - Energy Conservation, Management & Audit</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-803 - Entrepreneurship and Management Concepts">ME-803 - Entrepreneurship and Management Concepts</li>
+                <li class="subject" data-branch="MECH" data-sem="8" data-subject="ME-803 - Management Information System">ME-803 - Management Information System</li>
+            </ul>
+        </article>
+    </section>
+
+    <section id="ee">
+        <h2>Electrical Engineering (EE)</h2>
+        <article id="ee-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="EE" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="ee-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="EE" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        </section>
+
+    <section id="civil">
+        <h2>Civil Engineering (CIVIL)</h2>
+        <article id="civil-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="CIVIL" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="civil-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        <article id="civil-sem3">
+            <h3>Semester 3</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="BT-301 - Mathematics-III">BT-301 - Mathematics-III</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="CE-302 - Construction Materials">CE-302 - Construction Materials</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="CE-303 - Surveying">CE-303 - Surveying</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="CE-304 - Building Planning & Architecture">CE-304 - Building Planning & Architecture</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="CE-305 - Strength of Materials">CE-305 - Strength of Materials</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="CE-306 - Study of Historical & Ancient Civil Engineering Practices">CE-306 - Study of Historical & Ancient Civil Engineering Practices</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="BT-107 - Evaluation of Internship-I completed at I year level">BT-107 - Evaluation of Internship-I completed at I year level</li>
+                <li class="subject" data-branch="CIVIL" data-sem="3" data-subject="BT-307 - 90 hrs Internship based on using various softwares –Internship -II">BT-307 - 90 hrs Internship based on using various softwares –Internship -II</li>
+            </ul>
+        </article>
+        <article id="civil-sem4">
+            <h3>Semester 4</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="ES-401 - Energy & Environmental Engineering">ES-401 - Energy & Environmental Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="CE-402 - Construction Technology">CE-402 - Construction Technology</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="CE-403 - Structural Analysis-I">CE-403 - Structural Analysis-I</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="CE-404 - Transportation Engineering-I">CE-404 - Transportation Engineering-I</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="CE-405 - Engineering Geology & Remote Sensing">CE-405 - Engineering Geology & Remote Sensing</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="CE-406 - Software Lab">CE-406 - Software Lab</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="BT-407 - 90 hrs Internship based on using various software’s –Internship -II">BT-407 - 90 hrs Internship based on using various software’s –Internship -II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="4" data-subject="BT-408 - Cyber Security">BT-408 - Cyber Security</li>
+            </ul>
+        </article>
+        <article id="civil-sem5">
+            <h3>Semester 5</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-501 - Fluid Mechanics I">CE-501 - Fluid Mechanics I</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-502 - Transportation Engg II">CE-502 - Transportation Engg II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-503 - Structural Analysis-II">CE-503 - Structural Analysis-II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-503 - Construction planning and management">CE-503 - Construction planning and management</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-503 - Quantity surveying & Costing">CE-503 - Quantity surveying & Costing</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-503 - Marine Construction">CE-503 - Marine Construction</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-504 - Urban and town planning">CE-504 - Urban and town planning</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-504 - Remote Sensing and GIS">CE-504 - Remote Sensing and GIS</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-504 - Renewable energy resources">CE-504 - Renewable energy resources</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-504 - Entrepreneurship development and management">CE-504 - Entrepreneurship development and management</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-505 - Quantity surveying & Costing">CE-505 - Quantity surveying & Costing</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-506 - Material Testing Lab">CE-506 - Material Testing Lab</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-507 - Evaluation of Internship-II">CE-507 - Evaluation of Internship-II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="5" data-subject="CE-508 - Field Visit, Case Study and Seminar">CE-508 - Field Visit, Case Study and Seminar</li>
+            </ul>
+        </article>
+        <article id="civil-sem6">
+            <h3>Semester 6</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-601 - Structural Design and Drawing (RCC-I)">CE-601 - Structural Design and Drawing (RCC-I)</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-602 - Environmental Engineering I">CE-602 - Environmental Engineering I</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-603 - Water resources engineering">CE-603 - Water resources engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-603 - Precast and modular construction">CE-603 - Precast and modular construction</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-603 - Advance pavement design">CE-603 - Advance pavement design</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-603 - Cost effective and Eco-friendly structures">CE-603 - Cost effective and Eco-friendly structures</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-604 - Fluid Mechanics II">CE-604 - Fluid Mechanics II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-604 - Intellectual Property rights(IPR)">CE-604 - Intellectual Property rights(IPR)</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-604 - Environmental Impact Assessment">CE-604 - Environmental Impact Assessment</li>
+                <li class="subject" data-branch="CIVIL" data-sem="6" data-subject="CE-604 - Operation Research">CE-604 - Operation Research</li>
+            </ul>
+        </article>
+        <article id="civil-sem7">
+            <h3>Semester 7</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-701 - Geotechnical Engg">CE-701 - Geotechnical Engg</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-702 - Environmental Engg-II">CE-702 - Environmental Engg-II</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-702 - Prestressed Concrete Structures">CE-702 - Prestressed Concrete Structures</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-702 - Structural Design & Drawing [RCC-II]">CE-702 - Structural Design & Drawing [RCC-II]</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-702 - Structural Dynamics">CE-702 - Structural Dynamics</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-703 - Building Services">CE-703 - Building Services</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-703 - Integrated Waste Management">CE-703 - Integrated Waste Management</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-703 - Internet of Things">CE-703 - Internet of Things</li>
+                <li class="subject" data-branch="CIVIL" data-sem="7" data-subject="CE-703 - Project Management">CE-703 - Project Management</li>
+            </ul>
+        </article>
+        <article id="civil-sem8">
+            <h3>Semester 8</h3>
+            <ul>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-801 - Design of Steel Structures">CE-801 - Design of Steel Structures</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-802 - Bridge Engineering">CE-802 - Bridge Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-802 - Earthquake Resistant Design of Structures">CE-802 - Earthquake Resistant Design of Structures</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-802 - Engineering Hydrology">CE-802 - Engineering Hydrology</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-802 - Foundation Engineering">CE-802 - Foundation Engineering</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-803 - Artificial Intelligence">CE-803 - Artificial Intelligence</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-803 - Data Analytics">CE-803 - Data Analytics</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-803 - Integrated Water Management">CE-803 - Integrated Water Management</li>
+                <li class="subject" data-branch="CIVIL" data-sem="8" data-subject="CE-803 - Retrofitting and Rehabilitation of Structures">CE-803 - Retrofitting and Rehabilitation of Structures</li>
+            </ul>
+        </article>
+    </section>
+
+    <section id="it">
+        <h2>Information Technology (IT)</h2>
+        <article id="it-sem1">
+            <h3>Semester 1</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-101 - Engineering Chemistry">BT-101 - Engineering Chemistry</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-102 - Mathematics-I">BT-102 - Mathematics-I</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-103 - English for Communication">BT-103 - English for Communication</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-104 - Basic Electrical & Electronics Engineering">BT-104 - Basic Electrical & Electronics Engineering</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-105 - Engineering Graphics">BT-105 - Engineering Graphics</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-106 - Manufacturing Practices">BT-106 - Manufacturing Practices</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-107 - Internship-I(60 Hrs Duration) at the Institute level">BT-107 - Internship-I(60 Hrs Duration) at the Institute level</li>
+                <li class="subject" data-branch="IT" data-sem="1" data-subject="BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach">BT-108 - Swachh Bharat Summer Internship Unnat Bharat Abhiyan (100Hrs)/Rural Outreach</li>
+            </ul>
+        </article>
+        <article id="it-sem2">
+            <h3>Semester 2</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-201 - Engineering Physics">BT-201 - Engineering Physics</li>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-202 - Mathematics-II">BT-202 - Mathematics-II</li>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-203 - Basic Mechanical Engineering">BT-203 - Basic Mechanical Engineering</li>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-204 - Basic Civil Engineering & Mechanics">BT-204 - Basic Civil Engineering & Mechanics</li>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-205 - Basic Computer Engineering">BT-205 - Basic Computer Engineering</li>
+                <li class="subject" data-branch="IT" data-sem="2" data-subject="BT-206 - Language Lab & Seminars">BT-206 - Language Lab & Seminars</li>
+            </ul>
+        </article>
+        <article id="it-sem3">
+            <h3>Semester 3</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="ES-301 - Energy & Environmental Engineering">ES-301 - Energy & Environmental Engineering</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="IT-302 - Discrete Structure">IT-302 - Discrete Structure</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="IT-303 - Data Structure">IT-303 - Data Structure</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="IT-304 - Object Oriented Programming & Methodology">IT-304 - Object Oriented Programming & Methodology</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="IT-305 - Digital Circuits & System">IT-305 - Digital Circuits & System</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="IT-306 - JAVA Programming Lab">IT-306 - JAVA Programming Lab</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="BT-107 - Evaluation of Internship-I ompleted at I year level">BT-107 - Evaluation of Internship-I ompleted at I year level</li>
+                <li class="subject" data-branch="IT" data-sem="3" data-subject="BT-307 - 90 hrs Internship based on using various software’s –Internship -II">BT-307 - 90 hrs Internship based on using various software’s –Internship -II</li>
+            </ul>
+        </article>
+        <article id="it-sem4">
+            <h3>Semester 4</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="BT-401 - Mathematics- III">BT-401 - Mathematics- III</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-402 - Computer Architecture">IT-402 - Computer Architecture</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-403 - Analysis and Design of Algorithm">IT-403 - Analysis and Design of Algorithm</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-404 - Analog & Digital Communication">IT-404 - Analog & Digital Communication</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-405 - Data base Management System">IT-405 - Data base Management System</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-406 - Introduction to MATLAB, Scilab/Web Design">IT-406 - Introduction to MATLAB, Scilab/Web Design</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="IT-407 - Dot Net">IT-407 - Dot Net</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="BT-408 - 90 hrs Internship based on using various software’s –Internship -II">BT-408 - 90 hrs Internship based on using various software’s –Internship -II</li>
+                <li class="subject" data-branch="IT" data-sem="4" data-subject="BT-409 - Cyber Security">BT-409 - Cyber Security</li>
+            </ul>
+        </article>
+        <article id="it-sem5">
+            <h3>Semester 5</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-501 - Operating System">IT-501 - Operating System</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-502 - Computer Network">IT-502 - Computer Network</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-503 - Theory of Computation">IT-503 - Theory of Computation</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-503 - Microprocessor & Interfacing">IT-503 - Microprocessor & Interfacing</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-503 - Principles of programming Languages">IT-503 - Principles of programming Languages</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-504 - Artificial Intelligence">IT-504 - Artificial Intelligence</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-504 - E Commerce & Governance">IT-504 - E Commerce & Governance</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-504 - Java Programming">IT-504 - Java Programming</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-505 - Advanced Java Lab">IT-505 - Advanced Java Lab</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-506 - Soft Skills and Interpersonal Communication">IT-506 - Soft Skills and Interpersonal Communication</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-507 - Evaluation of Internship-II">IT-507 - Evaluation of Internship-II</li>
+                <li class="subject" data-branch="IT" data-sem="5" data-subject="IT-508 - Minor Project I/Seminar">IT-508 - Minor Project I/Seminar</li>
+            </ul>
+        </article>
+        <article id="it-sem6">
+            <h3>Semester 6</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-601 - Computer Graphics & Multimedia">IT-601 - Computer Graphics & Multimedia</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-602 - Wireless and Mobile Computing">IT-602 - Wireless and Mobile Computing</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-603 - Compiler Design">IT-603 - Compiler Design</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-603 - Data Mining">IT-603 - Data Mining</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-603 - Embedded Systems">IT-603 - Embedded Systems</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-604 - Intellectual Property Rights">IT-604 - Intellectual Property Rights</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-604 - Software Engineering">IT-604 - Software Engineering</li>
+                <li class="subject" data-branch="IT" data-sem="6" data-subject="IT-604 - Wireless Sensor Networks">IT-604 - Wireless Sensor Networks</li>
+            </ul>
+        </article>
+        <article id="it-sem7">
+            <h3>Semester 7</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-701 - Soft Computing">IT-701 - Soft Computing</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-702 - Augmented and Virtual Reality">IT-702 - Augmented and Virtual Reality</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-702 - Cloud Computing">IT-702 - Cloud Computing</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-702 - Data Science">IT-702 - Data Science</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-702 - Simulation and Modeling">IT-702 - Simulation and Modeling</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-703 - Cyber Laws and Forensics">IT-703 - Cyber Laws and Forensics</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-703 - Digital Image Processing">IT-703 - Digital Image Processing</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-703 - Internet of Things">IT-703 - Internet of Things</li>
+                <li class="subject" data-branch="IT" data-sem="7" data-subject="IT-703 - Social Networks">IT-703 - Social Networks</li>
+            </ul>
+        </article>
+        <article id="it-sem8">
+            <h3>Semester 8</h3>
+            <ul>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-801 - Information Security">IT-801 - Information Security</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-802 - Machine Learning">IT-802 - Machine Learning</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-802 - Natural Language Processing">IT-802 - Natural Language Processing</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-802 - Quantum Computing">IT-802 - Quantum Computing</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-802 - Robotics">IT-802 - Robotics</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-803 - 3D Printing and Design">IT-803 - 3D Printing and Design</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-803 - Blockchain Technology">IT-803 - Blockchain Technology</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-803 - Human Computer Interaction">IT-803 - Human Computer Interaction</li>
+                <li class="subject" data-branch="IT" data-sem="8" data-subject="IT-803 - Parallel Computing">IT-803 - Parallel Computing</li>
+            </ul>
+        </article>
+    </section>
+
+    <div id="subjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <ul id="unitList">
+                    </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Get references to DOM elements
+    const subjectItems = document.querySelectorAll('.subject');
+    const subjectModal = document.getElementById('subjectModal');
+    const modalHeader = subjectModal.querySelector('.modal-header');
+    const unitList = document.getElementById('unitList');
+    const closeModalButtons = document.querySelectorAll('.close-btn, .close-modal');
+
+    // Add click event listener to each subject list item
+    subjectItems.forEach(subject => {
+        subject.addEventListener('click', function() {
+            // Get data attributes from the clicked subject
+            const branch = this.dataset.branch;
+            const sem = this.dataset.sem;
+            const subjectName = this.dataset.subject;
+
+            // Prepare the subject name for filename conversion:
+            // Replace spaces with underscores
+            // Replace '&' with underscores
+            // Hyphens are kept as they are
+            const underscoredSubjectName = subjectName.replace(/ /g, '_').replace(/&/g, '_');
+
+            // Set the modal header text
+            modalHeader.textContent = subjectName + ' Notes';
+            unitList.innerHTML = ''; // Clear any previously loaded unit links
+
+            // Loop to generate download links for units 1 to 6
+            // You can adjust the '6' if some subjects have more or fewer units
+            for (let i = 1; i <= 6; i++) {
+                // Construct the PDF filename based on the agreed convention
+                const fileName = `${underscoredSubjectName}_Unit${i}.pdf`;
+                
+                // Create list item and anchor (link) elements
+                const listItem = document.createElement('li');
+                const downloadLink = document.createElement('a');
+                
+                // Set the href attribute to the expected path of the PDF file
+                // Example path: pdfs/CSE/3/CS-303_-_Data_Structure_Unit1.pdf
+                downloadLink.href = `pdfs/${branch}/${sem}/${fileName}`; 
+                
+                // Set the text displayed for the link (e.g., "Unit 1")
+                downloadLink.textContent = `Unit ${i}`;
+                
+                // Add the 'download' attribute to force download instead of opening in browser
+                downloadLink.download = fileName; 
+                
+                // Append the link to the list item, and the list item to the unit list
+                listItem.appendChild(downloadLink);
+                unitList.appendChild(listItem);
+            }
+
+            // Display the modal
+            subjectModal.classList.add('active');
+        });
+    });
+
+    // Add click event listeners to close buttons (X and 'Close' button)
+    closeModalButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            subjectModal.classList.remove('active'); // Hide the modal
+        });
+    });
+
+    // Close the modal if the user clicks outside of the modal content area
+    window.addEventListener('click', (event) => {
+        if (event.target === subjectModal) {
+            subjectModal.classList.remove('active');
+        }
+    });
+
+    // --- Branch Navigation Logic (from your original code) ---
+    const branchNavButtons = document.querySelectorAll('#branchNav button');
+    const branchSections = document.querySelectorAll('main > section');
+
+    branchNavButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove 'active' class from all branch buttons
+            branchNavButtons.forEach(btn => btn.classList.remove('active'));
+            // Add 'active' class to the clicked button
+            this.classList.add('active');
+            
+            // Get the target branch ID from the data attribute
+            const branch = this.dataset.branch;
+            
+            // Hide all branch sections
+            branchSections.forEach(section => section.classList.remove('active'));
+            // Show the selected branch section
+            document.getElementById(branch).classList.add('active');
+        });
+    });
+</script>
+
+</body>
+</html>
